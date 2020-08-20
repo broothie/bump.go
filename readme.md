@@ -26,6 +26,7 @@ $ go install
 Let's assume you have a file `version.txt`:
 ```
 $ cat version.txt
+blahblahblah
 version = "5.0.2"
 ```
 
@@ -34,6 +35,7 @@ version = "5.0.2"
 $ bump version.txt
 5.0.2 -> 5.0.3
 $ cat version.txt
+blahblahblah
 version = "5.0.3"
 ```
 
@@ -42,10 +44,12 @@ You can bump a specific segment with `-s` e.g.:
 $ bump version.txt -s minor
 5.0.3 -> 5.1.0
 $ cat version.txt
+blahblahblah
 version = "5.1.0"
 $ bump version.txt -s major
 5.1.0 -> 6.0.0
 $ cat version.txt
+blahblahblah
 version = "6.0.0"
 ```
 
@@ -59,9 +63,9 @@ SemVer bumping made easy!
 Flags:
   -h, --help             Show context-sensitive help (also try --help-long and --help-man).
   -s, --segment="patch"  SemVer segment to bump (major, minor, or patch).
-  -l, --line=LINE        Line number to look for SemVer pattern.
+  -l, --line=LINE        Line number on which to look for SemVer pattern.
   -o, --occurrence=1     If multiple SemVer patterns can be found, use this to indicate which one to bump.
-  -d, --dry-run          Don't rewrite file, just print output
+  -d, --dry-run          Don't rewrite file, just print output (overrides '-q').
   -q, --quiet            Suppress output.
   -v, --version          Show application version.
 

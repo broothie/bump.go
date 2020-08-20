@@ -1,14 +1,4 @@
 
-publish do |message|
-    raise 'missing GITHUB_TOKEN' unless ENV['GITHUB_TOKEN']
-    version = sh('bump bump.go').split(' -> ').last
-    invoke 'git', message
-    invoke 'tag', version, message
-    invoke 'tag.push', version
-    invoke 'clean'
-    invoke 'release'
-end
-
 git do |message|
     sh 'git add -A'
     sh %(git commit -m "#{message}")

@@ -13,7 +13,7 @@ import (
 
 var (
 	// Version
-	version = "0.0.4"
+	version = "0.0.5"
 
 	// SemVer regexp
 	semVerMatcher = regexp.MustCompile(`\d+\.\d+\.\d+`)
@@ -22,9 +22,9 @@ var (
 	command    = kingpin.New("bump", "SemVer bumping made easy!")
 	filename   = command.Arg("filename", "File containing SemVer pattern to bump.").Required().ExistingFile()
 	segment    = command.Flag("segment", "SemVer segment to bump (major, minor, or patch).").Short('s').Default("patch").String()
-	lineNumber = command.Flag("line", "Line number to look for SemVer pattern.").Short('l').Int()
+	lineNumber = command.Flag("line", "Line number on which to look for SemVer pattern.").Short('l').Int()
 	occurrence = command.Flag("occurrence", "If multiple SemVer patterns can be found, use this to indicate which one to bump.").Short('o').Default("1").Int()
-	dryRun     = command.Flag("dry-run", "Don't rewrite file, just print output").Short('d').Bool()
+	dryRun     = command.Flag("dry-run", "Don't rewrite file, just print output (overrides '-q').").Short('d').Bool()
 	quiet      = command.Flag("quiet", "Suppress output.").Short('q').Bool()
 )
 
@@ -105,7 +105,7 @@ func main() {
 	}
 
 	// Replace and write
-	position := offset + semVerMatcher.FindAllStringIndex(fileContents, *occurrence)[occurrenceIndex][0]
+	position := offset + semVerMatcher.FindAllStringIndex(searchSpace, *occurrence)[occurrenceIndex][0]
 	newFileContents := fileContents[:position] + bumpedSemver + fileContents[position+len(semVer):]
 	if err := ioutil.WriteFile(*filename, []byte(newFileContents), os.ModePerm); err != nil {
 		fmt.Println(err.Error())

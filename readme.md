@@ -1,9 +1,27 @@
 # `bump`
 SemVer bumping made easy!
 
+## Installation
+### Brew
+```shell script
+$ brew tap broothie/bump
+$ brew install bump
+```
+
+### Go
+```shell script
+$ go install github.com/broothie/bump
+```
+
+### Source
+```shell script
+$ git checkout https://github.com/broothie/bump.git
+$ go install
+```
+
 ## Usage
 Let's assume you have a file `version.txt`:
-```
+```shell script
 $ cat version.txt
 version = "5.0.2"
 ```

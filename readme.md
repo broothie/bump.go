@@ -1,6 +1,9 @@
 # `bump`
 SemVer bumping made easy!
 
+Bump is a tool for bumping SemVer patterns. Just run `bump <filename>` and bump will find and increment the first SemVer
+pattern it finds.
+
 ## Installation
 ### Brew
 ```
@@ -58,6 +61,7 @@ Flags:
   -s, --segment="patch"  SemVer segment to bump (major, minor, or patch).
   -l, --line=LINE        Line number to look for SemVer pattern.
   -o, --occurrence=1     If multiple SemVer patterns can be found, use this to indicate which one to bump.
+  -d, --dry-run          Don't rewrite file, just print output
   -q, --quiet            Suppress output.
   -v, --version          Show application version.
 

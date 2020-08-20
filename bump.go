@@ -19,20 +19,20 @@ var (
 	semVerMatcher = regexp.MustCompile(`\d+\.\d+\.\d+`)
 
 	// Args
-	command    = kingpin.New("bump", "SemVer bumping made easy.")
+	command    = kingpin.New("bump", "SemVer bumping made easy!")
 	filename   = command.Arg("filename", "File containing SemVer pattern to bump.").Required().ExistingFile()
 	segment    = command.Flag("segment", "SemVer segment to bump (major, minor, or patch).").Short('s').Default("patch").String()
 	lineNumber = command.Flag("line", "Line number to look for SemVer pattern.").Short('l').Int()
-	occurrence = command.Flag("occurrence", "If multiple SemVer patterns are found, use this to indicate which one to bump.").Short('o').Default("1").Int()
-	debump     = command.Flag("debump", "Decrement instead of increment.").Short('d').Bool()
+	occurrence = command.Flag("occurrence", "If multiple SemVer patterns can be found, use this to indicate which one to bump.").Short('o').Default("1").Int()
 	quiet      = command.Flag("quiet", "Suppress output.").Short('q').Bool()
 )
 
 func init() {
+	command.Author("Andrew Booth")
 	command.Version(version)
 	command.VersionFlag.Short('v')
 	command.HelpFlag.Short('h')
-	if _, err := command.Parse(os.Args); err != nil {
+	if _, err := command.Parse(os.Args[1:]); err != nil {
 		fmt.Printf(err.Error())
 		os.Exit(1)
 		return
@@ -53,50 +53,51 @@ func main() {
 
 	// Find SemVer pattern
 	occurrenceIndex := *occurrence - 1
-	var position int
-	switch {
-	case *lineNumber > 0: // Line number is specified
+	offset := 0
+	if *lineNumber > 0 {
+		// Line number is specified
+		// Split file into lines
 		lines := strings.Split(fileContents, "\n")
 		if *lineNumber > len(lines) {
-			fmt.Printf("line %d of %s doesn't exist (%s only has %d lines)\n",
-				*lineNumber,
-				*filename,
-				*filename,
-				len(lines),
-			)
-
+			fmt.Printf("line %d of %s doesn't exist (only %d lines)\n", *lineNumber, *filename, len(lines))
 			os.Exit(1)
 			return
 		}
 
+		// Count chars prior to match
 		lineNumberIndex := *lineNumber - 1
-		priorChars := 0
 		for i := 0; i < lineNumberIndex; i++ {
-			priorChars += len(lines[i]) + 1
+			offset += len(lines[i]) + 1
 		}
 
-		line := lines[lineNumberIndex]
-		searchSpace = line
-		position = priorChars + semVerMatcher.FindAllStringIndex(line, -1)[occurrenceIndex][0]
+		// Set search space to line
+		searchSpace = lines[lineNumberIndex]
+	}
 
-	default: // Replace first occurrence in file
-		position = semVerMatcher.FindAllStringIndex(fileContents, -1)[occurrenceIndex][0]
+	// Check occurrences vs matches
+	matches := semVerMatcher.FindAllString(searchSpace, *occurrence)
+	if occurrenceIndex >= len(matches) {
+		fmt.Printf("occurrence %d doesn't exist (only %d SemVer matches found)\n", *occurrence, len(matches))
+		os.Exit(1)
+		return
 	}
 
 	// Bump
-	semVer := semVerMatcher.FindAllString(searchSpace, -1)[occurrenceIndex]
-	bumpedSemver, err := bump(semVer, *segment, *debump)
+	semVer := matches[occurrenceIndex]
+	bumpedSemver, err := bump(semVer, *segment)
 	if err != nil {
 		fmt.Print(err.Error())
 		os.Exit(1)
 		return
 	}
 
+	// Print SemVer bump
 	if !*quiet {
-		fmt.Printf("%s: %s -> %s\n", *filename, semVer, bumpedSemver)
+		fmt.Printf("%s -> %s\n", semVer, bumpedSemver)
 	}
 
 	// Replace and write
+	position := offset + semVerMatcher.FindAllStringIndex(fileContents, *occurrence)[occurrenceIndex][0]
 	newFileContents := fileContents[:position] + bumpedSemver + fileContents[position+len(semVer):]
 	if err := ioutil.WriteFile(*filename, []byte(newFileContents), os.ModePerm); err != nil {
 		fmt.Println(err.Error())
@@ -104,29 +105,27 @@ func main() {
 	}
 }
 
-func bump(semVer string, segment string, debump bool) (string, error) {
+func bump(semVer string, segment string) (string, error) {
 	segments := strings.Split(semVer, ".")
 	majorStr, minorStr, patchStr := segments[0], segments[1], segments[2]
-
-	addee := 1
-	if debump {
-		addee = -1
-	}
 
 	switch strings.ToLower(segment) {
 	case "major":
 		majorInt, _ := strconv.Atoi(majorStr)
-		majorInt += addee
+		majorInt++
 		majorStr = strconv.Itoa(majorInt)
+		minorStr = "0"
+		patchStr = "0"
 
 	case "minor":
 		minorInt, _ := strconv.Atoi(minorStr)
-		minorInt += addee
+		minorInt++
 		minorStr = strconv.Itoa(minorInt)
+		patchStr = "0"
 
 	case "patch":
 		patchInt, _ := strconv.Atoi(patchStr)
-		patchInt += addee
+		patchInt++
 		patchStr = strconv.Itoa(patchInt)
 
 	default:

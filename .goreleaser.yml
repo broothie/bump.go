@@ -1,0 +1,30 @@
+project_name: bump
+
+before:
+  hooks:
+    - go mod download
+
+builds:
+  - main: ./bump.go
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - darwin
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - 386
+
+checksum:
+  name_template: 'checksums.txt'
+
+changelog:
+  sort: asc
+
+brews:
+  - homepage: 'https://github.com/broothie/bump'
+    description: 'bump - SemVer bumping made easy!'
+    github:
+      owner: broothie
+      name: homebrew-bump

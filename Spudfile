@@ -1,0 +1,30 @@
+
+git do |message|
+    sh 'git add -A'
+    sh %(git commit -m "#{message}")
+    sh 'git push'
+end
+
+tag do |version, message|
+    sh %(git tag -a #{version} -m "#{message}")
+end
+
+rule 'tag.list' do
+    puts shhh('git tag')
+        .split("\n")
+        .sort_by { |semver| semver[1..-1].split('.').map(&:to_i) }
+end
+
+rule 'tag.push' do |version|
+    sh "git push origin #{version}"
+end
+
+release do
+    raise 'missing GITHUB_TOKEN' unless ENV['GITHUB_TOKEN']
+    sh 'goreleaser --rm-dist'
+end
+
+clean do
+    sh? 'rm -rf bump'
+    sh? 'rm -rf dist'
+end

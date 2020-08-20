@@ -13,7 +13,7 @@ import (
 
 var (
 	// Version
-	version = "0.0.1"
+	version = "0.0.2"
 
 	// SemVer regexp
 	semVerMatcher = regexp.MustCompile(`\d+\.\d+\.\d+`)
@@ -24,6 +24,7 @@ var (
 	segment    = command.Flag("segment", "SemVer segment to bump (major, minor, or patch).").Short('s').Default("patch").String()
 	lineNumber = command.Flag("line", "Line number to look for SemVer pattern.").Short('l').Int()
 	occurrence = command.Flag("occurrence", "If multiple SemVer patterns can be found, use this to indicate which one to bump.").Short('o').Default("1").Int()
+	dryRun     = command.Flag("dry-run", "Don't rewrite file, just print output").Short('d').Bool()
 	quiet      = command.Flag("quiet", "Suppress output.").Short('q').Bool()
 )
 
@@ -33,7 +34,7 @@ func init() {
 	command.VersionFlag.Short('v')
 	command.HelpFlag.Short('h')
 	if _, err := command.Parse(os.Args[1:]); err != nil {
-		fmt.Printf(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 		return
 	}
@@ -52,7 +53,6 @@ func main() {
 	searchSpace := fileContents
 
 	// Find SemVer pattern
-	occurrenceIndex := *occurrence - 1
 	offset := 0
 	if *lineNumber > 0 {
 		// Line number is specified
@@ -64,19 +64,22 @@ func main() {
 			return
 		}
 
-		// Count chars prior to match
+		// Count chars prior to match and set search space
 		lineNumberIndex := *lineNumber - 1
+		searchSpace = lines[lineNumberIndex]
 		for i := 0; i < lineNumberIndex; i++ {
 			offset += len(lines[i]) + 1
 		}
-
-		// Set search space to line
-		searchSpace = lines[lineNumberIndex]
 	}
 
 	// Check occurrences vs matches
+	occurrenceIndex := *occurrence - 1
 	matches := semVerMatcher.FindAllString(searchSpace, *occurrence)
-	if occurrenceIndex >= len(matches) {
+	if len(matches) == 0 {
+		fmt.Printf("no SemVer pattern found in %s\n", *filename)
+		os.Exit(1)
+		return
+	} else if occurrenceIndex > len(matches) {
 		fmt.Printf("occurrence %d doesn't exist (only %d SemVer matches found)\n", *occurrence, len(matches))
 		os.Exit(1)
 		return
@@ -86,14 +89,19 @@ func main() {
 	semVer := matches[occurrenceIndex]
 	bumpedSemver, err := bump(semVer, *segment)
 	if err != nil {
-		fmt.Print(err.Error())
+		fmt.Println(err.Error())
 		os.Exit(1)
 		return
 	}
 
 	// Print SemVer bump
-	if !*quiet {
+	if *dryRun || !*quiet {
 		fmt.Printf("%s -> %s\n", semVer, bumpedSemver)
+	}
+
+	// Don't write if dry run
+	if *dryRun {
+		return
 	}
 
 	// Replace and write

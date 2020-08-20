@@ -34,18 +34,14 @@ $ cat version.txt
 version = "5.0.3"
 ```
 
-specify the minor segment with `-s`:
+You can bump a specific segment with `-s` e.g.:
 ```
 $ bump version.txt -s minor
-5.0.2 -> 5.1.0
+5.0.3 -> 5.1.0
 $ cat version.txt
 version = "5.1.0"
-```
-
-or the major segment: 
-```
 $ bump version.txt -s major
-5.0.2 -> 6.0.0
+5.1.0 -> 6.0.0
 $ cat version.txt
 version = "6.0.0"
 ```

@@ -26,8 +26,7 @@ $ go install
 Let's assume you have a file `version.txt`:
 ```
 $ cat version.txt
-blahblahblah
-version = "5.0.2"
+some_version_thing = "5.0.2" // blah blah blah...
 ```
 
 `bump` will increment the patch segment by default:
@@ -35,22 +34,19 @@ version = "5.0.2"
 $ bump version.txt
 5.0.2 -> 5.0.3
 $ cat version.txt
-blahblahblah
-version = "5.0.3"
+some_version_thing = "5.0.3" // blah blah blah...
 ```
 
-You can bump a specific segment with `-s` e.g.:
+You can bump a specific segment with `-s`:
 ```
 $ bump version.txt -s minor
 5.0.3 -> 5.1.0
 $ cat version.txt
-blahblahblah
-version = "5.1.0"
+some_version_thing = "5.1.0" // blah blah blah...
 $ bump version.txt -s major
 5.1.0 -> 6.0.0
 $ cat version.txt
-blahblahblah
-version = "6.0.0"
+some_version_thing = "6.0.0" // blah blah blah...
 ```
 
 ## Options

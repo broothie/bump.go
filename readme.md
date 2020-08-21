@@ -5,18 +5,21 @@ Bump is a tool for bumping SemVer patterns. Just run `bump <filename>` and bump 
 pattern it finds.
 
 ## Installation
-### Brew
+### Via Brew
 ```
 $ brew tap broothie/bump
 $ brew install bump
 ```
 
-### Go
+### Via Releases
+Found on the [releases page](https://github.com/broothie/bump/releases).
+
+### Via Go
 ```
 $ go install github.com/broothie/bump
 ```
 
-### Source
+### Via Source
 ```
 $ git checkout https://github.com/broothie/bump.git
 $ go install

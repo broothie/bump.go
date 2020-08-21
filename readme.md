@@ -1,7 +1,7 @@
 # `bump`
 SemVer bumping made easy!
 
-Bump is a tool for bumping SemVer patterns. Just run `bump <filename>` and bump will find and increment the first SemVer
+Bump is a tool for bumping SemVer patterns. Just run `bump <filename>` and bump will increment the first SemVer
 pattern it finds.
 
 ## Installation
